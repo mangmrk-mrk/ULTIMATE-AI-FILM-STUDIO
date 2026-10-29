@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ultimate AI Film Studio</title>
+<style>
+:root{--bg:#0a0b10;--panel:#131620;--panel2:#191d29;--line:#2b3040;--text:#f4f5f8;--muted:#a8afc0;--accent:#c7a6ff;--accent2:#8ce0d0;--danger:#ff9a9a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#19142a 0,#0a0b10 50%);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:28px 22px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#0a0b10eF;backdrop-filter:blur(12px);z-index:5}
+.wrap{max-width:1400px;margin:auto}.brand{display:flex;gap:12px;align-items:center}.logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,#c7a6ff,#8ce0d0);color:#15121d;font-size:22px;font-weight:900}
+h1{font-size:clamp(22px,3vw,32px);margin:0;letter-spacing:-.04em}header p{color:var(--muted);margin:6px 0 0}
+main{max-width:1400px;margin:auto;padding:22px;display:grid;grid-template-columns:320px minmax(0,1fr);gap:20px}
+.panel{background:linear-gradient(180deg,#171a26,#11141c);border:1px solid var(--line);border-radius:18px;padding:18px;min-width:0}
+h2{font-size:17px;margin:0 0 14px}h3{font-size:15px;margin:0 0 9px}label{display:block;color:#dfe2eb;font-size:13px;margin:13px 0 6px}
+input,select,textarea{width:100%;background:#0c0e15;color:var(--text);border:1px solid #353b4d;border-radius:10px;padding:10px 11px;font:inherit;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}textarea{min-height:88px;resize:vertical}
+button{border:1px solid #444a5d;background:#242838;color:var(--text);padding:10px 13px;border-radius:10px;font-weight:650;cursor:pointer}
+button:hover{filter:brightness(1.14)}button.primary{background:linear-gradient(135deg,#c7a6ff,#a8c4ff);color:#17121f;border:0}button.mint{background:#18332f;border-color:#28534b;color:#baffef}button.danger{color:var(--danger)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.muted{color:var(--muted);font-size:12px}.tag{display:inline-block;border:1px solid #41475b;border-radius:999px;padding:3px 8px;color:#c9cde0;font-size:11px}
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}.tab{background:transparent}.tab.active{background:#302741;border-color:#8063aa;color:#e8d9ff}
+.view{display:none}.view.active{display:block}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}.stat{background:#0c0e15;border:1px solid var(--line);border-radius:12px;padding:12px}.stat b{font-size:20px;display:block}.stat span{color:var(--muted);font-size:12px}
+.scene{border:1px solid var(--line);border-radius:14px;padding:14px;background:#0d1018;margin:10px 0}.scenehead{display:flex;align-items:center;justify-content:space-between;gap:10px}.scenehead b{color:var(--accent2)}.scene textarea{min-height:68px}.scene .actions{margin-top:8px}
+.output{white-space:pre-wrap;overflow-wrap:anywhere;background:#090b11;border:1px solid var(--line);border-radius:12px;padding:14px;min-height:180px;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}
+.preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}.thumb{width:90px;height:90px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.notice{border-left:3px solid var(--accent);background:#211c2d;padding:12px;border-radius:8px;color:#e5dcf5;font-size:13px;margin:12px 0}
+.status{font-size:12px;color:var(--accent2);min-height:18px;margin-top:8px}.smallbtn{padding:6px 9px;font-size:12px}.check{display:flex;align-items:center;gap:8px}.check input{width:auto}
+footer{max-width:1400px;margin:0 auto;padding:0 22px 28px;color:var(--muted);font-size:12px}
+@media(max-width:900px){main{grid-template-columns:1fr;padding:12px}.sidebar{order:2}header{position:static}.grid3{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.grid2,.grid3{grid-template-columns:1fr}.statrow{grid-template-columns:repeat(3,1fr)}.panel{padding:14px}header{padding:18px 14px}main{padding:12px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="brand"><div class="logo">✦</div><div><h1>ULTIMATE AI FILM STUDIO</h1><p>AI Story Lab · Cinematic storytelling → storyboard → Google Flow prompts</p></div></div></div></header>
+<main>
+<aside class="panel sidebar">
+<h2>Project Setup <span class="tag">LOCAL WORKSPACE</span></h2>
+<label>ชื่อโปรเจกต์</label><input id="projectName" value="The Lost Kingdom">
+<label>ไอเดีย / เรื่องย่อ</label><textarea id="idea">นักเดินทางผู้โดดเดี่ยวค้นพบอาณาจักรโบราณที่ซ่อนอยู่เหนือทะเลเมฆ และต้องตัดสินใจว่าจะปลุกมังกรผู้พิทักษ์หรือไม่</textarea>
+<label>ประเภทผลงาน</label><select id="genre"><option>Cinematic Fantasy</option><option>Wuxia / Martial Arts</option><option>Dark Fantasy</option><option>Science Fiction</option><option>Horror / Thriller</option><option>Product Commercial</option><option>Pet Cinematic</option><option>Documentary</option><option>Action</option><option>Romance / Drama</option></select>
+<label>ความยาวโปรเจกต์</label><select id="length"><option value="30">30 วินาที · Short</option><option value="60">60 วินาที · Short Film</option><option value="180">3 นาที</option><option value="480" selected>8 นาที · Episode</option><option value="900">15 นาที</option></select>
+<label>ความยาวคลิปแต่ละช็อต</label><select id="clipLength"><option value="4">4 วินาที</option><option value="6">6 วินาที</option><option value="8" selected>8 วินาที</option><option value="10">10 วินาที</option></select>
+<div class="grid2"><div><label>อัตราส่วน</label><select id="ratio"><option>9:16</option><option>16:9</option><option>1:1</option></select></div><div><label>สไตล์ภาพ</label><select id="style"><option>Photorealistic live-action cinema</option><option>AAA cinematic fantasy realism</option><option>Premium commercial CGI</option><option>Anime cinematic</option><option>Retro pixel × 3D</option><option>Documentary realism</option></select></div></div>
+<label>ภาษาเสียง / บทพากย์</label><select id="voiceLang"><option>Thai narration</option><option>English dialogue</option><option>No dialogue — music and SFX only</option><option>Thai dialogue and narration</option></select>
+<label>โทนอารมณ์</label><input id="mood" value="มหากาพย์ ลึกลับ ยิ่งใหญ่ และมีความหวัง">
+<label>ตัวละครหลัก / ลักษณะที่ต้องล็อก</label><textarea id="character">นักเดินทางชายวัยผู้ใหญ่ รูปร่างนักผจญภัย เสื้อคลุมเดินทางสีเข้ม มีรอยแผลเล็กเหนือคิ้วซ้าย พกดาบโบราณ</textarea>
+<label>สถานที่หลัก</label><textarea id="setting">อาณาจักรจีนโบราณเหนือทะเลเมฆ สถาปัตยกรรมหินหยก สะพานลอยฟ้า น้ำตกไหลลงสู่เมฆ</textarea>
+<label>โทนเสียง / Sound design</label><input id="sound" value="orchestral cinematic score, wind ambience, deep dragon growl, stone impacts">
+<div class="actions"><button class="primary" id="generateStory">สร้างโครงเรื่อง + ฉาก</button><button id="saveProject">บันทึก JSON</button><button id="loadProject">นำเข้า JSON</button><input id="importFile" type="file" accept=".json,application/json" hidden></div>
+<div class="status" id="status"></div>
+<div class="notice">เวอร์ชันนี้สร้างเรื่องและ Prompt ภายในเบราว์เซอร์ได้ทันที ไม่ต้องใช้ API Key หากต้องการให้ AI เขียนเนื้อหาแบบสด ให้ตั้งค่า Backend ในแท็บ API</div>
+</aside>
+<section class="panel">
+<div class="tabs">
+<button class="tab active" data-tab="overview">Overview</button><button class="tab" data-tab="story">Story Bible</button><button class="tab" data-tab="scenes">Scenes / Storyboard</button><button class="tab" data-tab="prompts">Flow Prompts</button><button class="tab" data-tab="assets">Reference Assets</button><button class="tab" data-tab="api">API / Developer</button>
+</div>
+<div id="overview" class="view active">
+<div class="statrow"><div class="stat"><b id="statScenes">0</b><span>Scenes</span></div><div class="stat"><b id="statDuration">0s</b><span>Target duration</span></div><div class="stat"><b id="statPrompts">0</b><span>Prompts ready</span></div></div>
+<h2>Production Dashboard</h2><p class="muted">สร้างแพ็กเกจการผลิตแบบแยกคลิป พร้อม Story Bible, visual continuity, เสียง และ Prompt สำหรับนำไปใช้ใน Google Flow</p>
+<div class="grid2">
+<div class="scene"><h3>01 · Story Development</h3><p class="muted">Logline, story beats, arc และ ending</p><button class="smallbtn" data-goto="story">เปิด Story Bible</button></div>
+<div class="scene"><h3>02 · Scene Builder</h3><p class="muted">การกระทำ มุมกล้อง แสง เสียง และบทพากย์</p><button class="smallbtn" data-goto="scenes">เปิด Storyboard</button></div>
+<div class="scene"><h3>03 · Prompt Engine</h3><p class="muted">Prompt ภาษาอังกฤษพร้อม continuity lock</p><button class="smallbtn" data-goto="prompts">สร้าง Prompt</button></div>
+<div class="scene"><h3>04 · Export</h3><p class="muted">ส่งออก JSON, TXT และ Prompt รายฉาก</p><div class="actions"><button class="smallbtn" id="exportTxt">ส่งออก TXT</button><button class="smallbtn" id="exportJson">ส่งออก JSON</button></div></div>
+</div>
+<div class="notice">Production rule: โมเดลวิดีโอสร้างเป็นคลิปสั้น ๆ ตามความสามารถของโมเดล จากนั้นนำคลิปไปเรียงต่อใน editor เพื่อทำหนังยาว อย่าคาดหวังให้การเรียกครั้งเดียวสร้างหนัง 8–15 นาทีได้โดยตรง</div>
+</div>
+<div id="story" class="view">
+<h2>Story Bible</h2><div class="actions"><button class="primary" id="refreshStory">สร้าง / อัปเดต Story Bible</button><button id="copyStory">คัดลอก</button></div>
+<label>Logline</label><textarea id="logline"></textarea><label>เรื่องย่อ</label><textarea id="synopsis" style="min-height:140px"></textarea>
+<div class="grid2"><div><label>จุดเริ่มต้น</label><textarea id="beat1"></textarea></div><div><label>จุดเปลี่ยน</label><textarea id="beat2"></textarea></div><div><label>ไคลแมกซ์</label><textarea id="beat3"></textarea></div><div><label>บทสรุป</label><textarea id="beat4"></textarea></div></div>
+<label>กฎความต่อเนื่อง (Continuity Bible)</label><textarea id="continuity" style="min-height:130px"></textarea>
+</div>
+<div id="scenes" class="view">
+<h2>Scenes & Storyboard</h2><p class="muted">แก้ไขฉากได้ทุกช่อง แล้วกดสร้าง Prompt เพื่ออัปเดตเวอร์ชันที่ใช้ผลิต</p>
+<div class="actions"><button class="primary" id="addScene">+ เพิ่มฉาก</button><button id="regenScenes">สร้างฉากใหม่</button><button id="copyAllScenes">คัดลอกทุกฉาก</button></div>
+<div id="sceneList"></div>
+</div>
+<div id="prompts" class="view">
+<h2>Google Flow Prompt Engine</h2>
+<label>เลือกฉาก</label><select id="promptScene"></select>
+<div class="actions"><button class="primary" id="buildPrompt">สร้าง Prompt</button><button id="copyPrompt">คัดลอก Prompt</button><button id="downloadPrompt">ดาวน์โหลด Prompt TXT</button><button id="buildAllPrompts">สร้างทุก Prompt</button></div>
+<div id="promptOutput" class="output">เลือกฉาก แล้วกด “สร้าง Prompt”</div>
+<label>Prompt รวมทุกฉาก</label><div id="allPrompts" class="output">ยังไม่มี Prompt รวม</div>
+</div>
+<div id="assets" class="view">
+<h2>Reference Assets</h2><p class="muted">เพิ่มภาพอ้างอิงตัวละคร สถานที่ สินค้า หรือเฟรมแรก/เฟรมสุดท้ายไว้ในโปรเจกต์บนเครื่องนี้</p>
+<label>ประเภทภาพ</label><select id="assetType"><option>Character reference</option><option>Costume / prop reference</option><option>Location reference</option><option>Product reference</option><option>First frame</option><option>Last frame</option><option>Style reference</option></select>
+<label>เลือกภาพ (สูงสุด 8 ภาพในตัวอย่างนี้)</label><input id="assetFiles" type="file" accept="image/*" multiple>
+<div id="assetPreview" class="preview"></div><div class="actions"><button id="clearAssets">ล้างรายการภาพ</button></div>
+<div class="notice">ภาพถูกเก็บในสถานะของหน้าเว็บระหว่างใช้งานเท่านั้น และจะถูกใส่ใน JSON export เมื่อขนาดไฟล์เหมาะสม โปรเจกต์ที่มีภาพขนาดใหญ่มากอาจทำให้ JSON ใหญ่ตามไปด้วย</div>
+</div>
+<div id="api" class="view">
+<h2>API / Developer Settings</h2>
+<div class="notice"><b>ความปลอดภัย:</b> อย่าใส่ Gemini API Key ลงใน HTML ที่นำไปเผยแพร่สาธารณะ ใช้ Backend เป็นตัวกลางเสมอ</div>
+<label>Backend URL (เช่น http://localhost:3000/api/generate)</label><input id="apiUrl" placeholder="http://localhost:3000/api/generate">
+<label>คำสั่งให้ AI สร้าง / ปรับปรุงเนื้อหา (optional)</label><textarea id="apiInstruction">ช่วยพัฒนาเรื่องและฉากให้เป็นภาพยนตร์ มีเหตุผลต่อเนื่อง ระบุภาพและการกระทำที่มองเห็นได้ หลีกเลี่ยงคำบรรยายคลุมเครือ และส่งผลลัพธ์เป็น JSON ตาม schema ที่กำหนด</textarea>
+<div class="actions"><button class="primary" id="callApi">เรียก Backend เพื่อสร้าง Story</button><button id="testApi">ทดสอบการเชื่อมต่อ</button></div><div class="status" id="apiStatus"></div>
+<label>Developer notes</label><div class="output">Frontend: index.html (no build step)
+Backend example: server.mjs (Node.js 20+)
+Endpoint: POST /api/generate
+Request: { "prompt": "...", "project": { ... } }
+Response: { "text": "AI generated response" }
+Set GEMINI_API_KEY on server environment; never commit .env or keys.
+Google Flow UI is a separate product; this backend example calls Gemini text generation, not Google Flow's private UI.</div>
+</div>
+</section>
+</main>
+<footer>Ultimate AI Film Studio · Prototype for local creative production · Save exported project files to keep your work.</footer>
+<script>
+const $=id=>document.getElementById(id);
+let scenes=[], assets=[], storyData={};
+const getVal=id=>$(id).value.trim();
+const projectConfig=()=>({name:getVal('projectName'),idea:getVal('idea'),genre:getVal('genre'),length:+getVal('length'),clipLength:+getVal('clipLength'),ratio:getVal('ratio'),style:getVal('style'),voiceLang:getVal('voiceLang'),mood:getVal('mood'),character:getVal('character'),setting:getVal('setting'),sound:getVal('sound')});
+function setStatus(s){$('status').textContent=s}
+function switchTab(tab){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===tab));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab))}
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.goto)));
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function makeStory(){
+ const c=projectConfig(), mins=Math.max(1,Math.ceil(c.length/60));
+ const log=`เมื่อ ${c.idea.replace(/[.!?。]$/,'')} ${c.mood} กลายเป็นแรงผลักดันให้ตัวละครต้องเผชิญหน้ากับทางเลือกที่เปลี่ยนชะตาของโลก`;
+ const synopsis=`${c.name} เป็นเรื่องแนว ${c.genre} ในโลกของ ${c.setting} ตัวเอกคือ ${c.character} เมื่อ ${c.idea} เขาต้องผ่านการทดสอบที่ค่อย ๆ เปิดเผยความจริงเบื้องหลังสถานที่แห่งนี้ เรื่องดำเนินจากการค้นพบ ไปสู่ความขัดแย้งและการตัดสินใจครั้งสำคัญ ก่อนจบด้วยผลลัพธ์ที่เปลี่ยนตัวละครและโลกของเขา`;
+ storyData={logline:log,synopsis,beat1:'เปิดโลกและแนะนำตัวละคร: ภาพกว้างของสถานที่หลัก ตัวละครเข้าสู่ฉากพร้อมเป้าหมายที่ชัดเจน',beat2:'จุดเปลี่ยน: เบาะแสหรืออุปสรรคทำให้ภารกิจซับซ้อนขึ้น ตัวละครต้องเลือกว่าจะเดินหน้าหรือถอย',beat3:'ไคลแมกซ์: ตัวละครเผชิญหน้ากับอุปสรรคหลัก ใช้สิ่งที่เรียนรู้และตัดสินใจด้วยตนเอง',beat4:'บทสรุป: ผลจากการตัดสินใจปรากฏให้เห็น ปิดเรื่องด้วยภาพจำที่ทรงพลังและเปิดพื้นที่ให้ผู้ชมตีความ',continuity:`CHARACTER LOCK: ${c.character}\nWORLD LOCK: ${c.setting}\nVISUAL STYLE LOCK: ${c.style}; ${c.mood}\nWARDROBE / PROPS: ห้ามเปลี่ยนเสื้อผ้า อุปกรณ์ หรือรายละเอียดเด่นโดยไม่มีเหตุผลในเรื่อง\nSCREEN DIRECTION: รักษาทิศทางการเคลื่อนที่และตำแหน่งสัมพันธ์ระหว่างช็อต\nLIGHT / COLOR: รักษาโทนสีและแหล่งกำเนิดแสงให้สอดคล้องกัน\nAUDIO: ${c.sound}\nFORMAT: ${c.ratio}; shot target ${c.clipLength}s`};
+ Object.entries(storyData).forEach(([k,v])=>{if($(k))$(k).value=v});
+}
+function sceneTemplates(){
+ const c=projectConfig(), n=Math.max(3,Math.ceil(c.length/c.clipLength)), out=[];
+ const beats=[
+  ['Establishing reveal','ภาพเปิดกว้างเผยสถานที่หลัก ตัวละครปรากฏในเฟรมเพื่อสร้างสเกลและบรรยากาศ','Extreme wide shot, slow cinematic push-in','เสียงลมและดนตรีเริ่มจากเบาไปสู่ยิ่งใหญ่','โลกใบนี้ซ่อนความลับที่ไม่มีใครกล้าเอ่ยถึง'],
+  ['The discovery','ตัวละครสังเกตเห็นเบาะแสสำคัญและค่อย ๆ เข้าใกล้','Medium tracking shot transitioning to close-up','เสียงฝีเท้า วัสดุเสียดสี และเสียง ambience','แต่วันนี้ ทุกอย่างกำลังจะเปลี่ยนไป'],
+  ['The obstacle','ภัยหรืออุปสรรคปรากฏ ทำให้ตัวละครต้องหยุดและประเมินสถานการณ์','Low-angle reveal, subtle handheld movement','เสียงกระแทกต่ำและดนตรีตึงเครียด','ทางข้างหน้าไม่ใช่คำตอบง่าย ๆ'],
+  ['The decision','ตัวละครตัดสินใจลงมือทำ เผยอารมณ์ผ่านสายตาและท่าทาง','Tight close-up then controlled dolly-out','ดนตรีค่อย ๆ เพิ่มแรงส่ง','เขาต้องเลือกสิ่งที่เชื่อ แม้ต้องแลกด้วยบางอย่าง'],
+  ['Climax / payoff','การกระทำหลักเกิดขึ้นและส่งผลต่อสภาพแวดล้อมอย่างชัดเจน','Dynamic tracking shot with readable action','Impact sound, debris, score peak','ในวินาทีนั้น ชะตากรรมถูกเขียนขึ้นใหม่'],
+  ['Final image','ภาพปิดเผยผลลัพธ์และทิ้งภาพจำที่เชื่อมกับภาพเปิด','Wide hero composition, slow pull-back','ดนตรีคลี่คลายและเสียง ambience','และตำนานบทใหม่ก็เริ่มต้น']
+ ];
+ for(let i=0;i<n;i++){let b=beats[Math.min(beats.length-1,Math.floor(i*beats.length/n))];out.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+i),title:`Scene ${String(i+1).padStart(2,'0')} — ${b[0]}`,duration:c.clipLength,visual:`${b[1]}. ${c.character}. Location: ${c.setting}.`,camera:b[2],lighting:`${c.style}; cinematic motivated lighting, coherent color palette, realistic materials`,audio:`${c.sound}; ${b[3]}`,voice:c.voiceLang==='No dialogue — music and SFX only'?'No dialogue.':b[4],transition:i===n-1?'End on a strong visual beat.':'Match cut or motivated cut into the next scene.',prompt:''})}
+ scenes=out;renderScenes();updateStats();populatePromptSelect();setStatus(`สร้าง ${scenes.length} ฉากแล้ว`);
+}
+function renderScenes(){
+ const root=$('sceneList');root.innerHTML='';
+ scenes.forEach((s,i)=>{const d=document.createElement('div');d.className='scene';d.innerHTML=`
+ <div class="scenehead"><b>${escapeHtml(s.title)}</b><span class="tag">${s.duration}s</span></div>
+ <label>ชื่อฉาก</label><input data-field="title" data-i="${i}" value="${escapeHtml(s.title)}">
+ <div class="grid2"><div><label>ระยะเวลา (วินาที)</label><select data-field="duration" data-i="${i}">${[4,6,8,10].map(v=>`<option ${s.duration===v?'selected':''}>${v}</option>`).join('')}</select></div><div><label>กล้อง / การเคลื่อนกล้อง</label><input data-field="camera" data-i="${i}" value="${escapeHtml(s.camera)}"></div></div>
+ <label>ภาพและการกระทำ (Visual action)</label><textarea data-field="visual" data-i="${i}">${escapeHtml(s.visual)}</textarea>
+ <label>แสงและสไตล์ภาพ</label><textarea data-field="lighting" data-i="${i}">${escapeHtml(s.lighting)}</textarea>
+ <label>เสียง / ดนตรี / SFX</label><textarea data-field="audio" data-i="${i}">${escapeHtml(s.audio)}</textarea>
+ <label>บทพากย์ / บทพูด</label><textarea data-field="voice" data-i="${i}">${escapeHtml(s.voice)}</textarea>
+ <label>การเชื่อมต่อช็อต</label><input data-field="transition" data-i="${i}" value="${escapeHtml(s.transition)}">
+ <div class="actions"><button class="smallbtn" data-prompt="${i}">สร้าง Prompt ฉากนี้</button><button class="smallbtn danger" data-remove="${i}">ลบฉาก</button></div>`;
+ root.appendChild(d)});
+ root.querySelectorAll('[data-field]').forEach(el=>el.addEventListener('input',e=>{let i=+e.target.dataset.i,k=e.target.dataset.field;scenes[i][k]=k==='duration'?+e.target.value:e.target.value;updateStats();populatePromptSelect()}));
+ root.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>{populatePromptSelect();$('promptScene').value=String(b.dataset.prompt);buildPrompt(+b.dataset.prompt);switchTab('prompts')}));
+ root.querySelectorAll('[data-remove]').forEach(b=>b.addEventListener('click',()=>{scenes.splice(+b.dataset.remove,1);renderScenes();updateStats();populatePromptSelect()}));
+}
+function buildPromptText(s,i){
+ const c=projectConfig(), bible=getVal('continuity')||`${c.character}; ${c.setting}; ${c.style}; ${c.ratio}`;
+ return `GOOGLE FLOW — CINEMATIC VIDEO PROMPT\nPROJECT: ${c.name}\nSCENE: ${i+1} — ${s.title}\nDURATION TARGET: ${s.duration} seconds (select a supported duration in Flow)\nASPECT RATIO: ${c.ratio}\n\nSUBJECT & CONTINUITY LOCK:\n${bible}\n\nVISUAL ACTION:\n${s.visual}\n\nCAMERA & COMPOSITION:\n${s.camera}. Clear subject silhouette, readable action, intentional framing, natural perspective, no unintended camera shake.\n\nLIGHTING & LOOK:\n${s.lighting}. ${c.style}. ${c.mood}. High detail, physically plausible motion, coherent materials, controlled highlights.\n\nAUDIO:\n${s.audio}. ${s.voice}\n\nTRANSITION / END FRAME:\n${s.transition}\n\nNEGATIVE / QUALITY GUARDRAILS:\nNo identity drift, no wardrobe changes, no duplicated characters, no extra limbs, no warped hands, no flickering objects, no random text or logos, no abrupt location changes, no inconsistent screen direction. Preserve visual continuity with adjacent clips.\n\nPRODUCTION NOTE:\nGenerate this as one short clip. For a longer film, create each scene separately and assemble in an editor. Reuse the same character/location reference images where supported. Review model, duration, aspect ratio, and reference-image support in Google Flow before generation.`;
+}
+function buildPrompt(i=+$('promptScene').value||0){if(!scenes.length){$('promptOutput').textContent='กรุณาสร้างฉากก่อน';return}i=Math.max(0,Math.min(i,scenes.length-1));$('promptScene').value=String(i);let p=buildPromptText(scenes[i],i);scenes[i].prompt=p;$('promptOutput').textContent=p;updateStats();return p}
+function populatePromptSelect(){let sel=$('promptScene'),old=sel.value;sel.innerHTML=scenes.map((s,i)=>`<option value="${i}">${i+1}. ${escapeHtml(s.title)}</option>`).join('');if(scenes.length)sel.value=(old!==''&&+old<scenes.length)?old:'0'}
+function updateStats(){$('statScenes').textContent=scenes.length;$('statDuration').textContent=scenes.reduce((a,s)=>a+(+s.duration||0),0)+'s';$('statPrompts').textContent=scenes.filter(s=>s.prompt).length}
+function allPromptText(){return scenes.map((s,i)=>s.prompt||buildPromptText(s,i)).join('\n\n'+'='.repeat(72)+'\n\n')}
+function currentProject(){return {app:'Ultimate AI Film Studio',version:1,createdAt:new Date().toISOString(),config:projectConfig(),story:storyData,storyFields:{logline:getVal('logline'),synopsis:getVal('synopsis'),beat1:getVal('beat1'),beat2:getVal('beat2'),beat3:getVal('beat3'),beat4:getVal('beat4'),continuity:getVal('continuity')},scenes,assets:assets.map(a=>({name:a.name,type:a.type,dataUrl:a.dataUrl})),apiUrl:getVal('apiUrl')}}
+function download(name,content,type='text/plain'){const blob=new Blob([content],{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function safeName(s){return (s||'film-project').replace(/[^a-z0-9ก-๙_-]+/gi,'-').slice(0,60)}
+function loadProject(p){if(p.config)Object.entries(p.config).forEach(([k,v])=>{let el=$({name:'projectName',idea:'idea',genre:'genre',length:'length',clipLength:'clipLength',ratio:'ratio',style:'style',voiceLang:'voiceLang',mood:'mood',character:'character',setting:'setting',sound:'sound'}[k]);if(el)el.value=v});storyData=p.story||{};if(p.storyFields)Object.entries(p.storyFields).forEach(([k,v])=>{if($(k))$(k).value=v});scenes=p.scenes||[];assets=p.assets||[];renderScenes();renderAssets();populatePromptSelect();updateStats();setStatus('นำเข้าโปรเจกต์แล้ว')}
+$('generateStory').onclick=()=>{makeStory();sceneTemplates();switchTab('scenes')};
+$('refreshStory').onclick=makeStory;
+$('regenScenes').onclick=sceneTemplates;
+$('addScene').onclick=()=>{const c=projectConfig();scenes.push({id:String(Date.now()),title:`Scene ${scenes.length+1} — New beat`,duration:c.clipLength,visual:c.character+' performs a clear, motivated action in '+c.setting,camera:'Medium shot, slow dolly-in',lighting:c.style+', motivated cinematic lighting',audio:c.sound,voice:'',transition:'Cut on action into next scene',prompt:''});renderScenes();populatePromptSelect();updateStats()};
+$('buildPrompt').onclick=()=>buildPrompt();
+$('copyPrompt').onclick=()=>copyText($('promptOutput').textContent);
+$('downloadPrompt').onclick=()=>download(safeName(getVal('projectName'))+'-scene-prompt.txt',$('promptOutput').textContent);
+$('buildAllPrompts').onclick=()=>{scenes.forEach((s,i)=>s.prompt=buildPromptText(s,i));$('allPrompts').textContent=allPromptText();updateStats()};
+$('copyAllScenes').onclick=()=>copyText(scenes.map((s,i)=>`${i+1}. ${s.title}\nVisual: ${s.visual}\nCamera: ${s.camera}\nAudio: ${s.audio}\nVoice: ${s.voice}`).join('\n\n'));
+$('copyStory').onclick=()=>copyText(['LOGLINE',getVal('logline'),'SYNOPSIS',getVal('synopsis'),'BEATS',getVal('beat1'),getVal('beat2'),getVal('beat3'),getVal('beat4'),'CONTINUITY',getVal('continuity')].join('\n\n'));
+$('exportTxt').onclick=()=>download(safeName(getVal('projectName'))+'-production-pack.txt',`PROJECT: ${getVal('projectName')}\n\nSTORY BIBLE\n${getVal('logline')}\n${getVal('synopsis')}\n\nCONTINUITY\n${getVal('continuity')}\n\nSCENE PROMPTS\n${allPromptText()}`);
+$('exportJson').onclick=$('saveProject').onclick=()=>download(safeName(getVal('projectName'))+'.json',JSON.stringify(currentProject(),null,2),'application/json');
+$('loadProject').onclick=()=>$('importFile').click();
+$('importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{loadProject(JSON.parse(await f.text()))}catch(err){setStatus('ไฟล์ JSON ไม่ถูกต้อง: '+err.message)}e.target.value=''};
+async function copyText(t){try{await navigator.clipboard.writeText(t);setStatus('คัดลอกแล้ว')}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();setStatus('คัดลอกแล้ว')}}
+function renderAssets(){const root=$('assetPreview');root.innerHTML='';assets.forEach((a,i)=>{const d=document.createElement('div');d.innerHTML=`<img class="thumb" src="${a.dataUrl}" alt="${escapeHtml(a.name)}"><div class="muted">${escapeHtml(a.type)}<br>${escapeHtml(a.name)}</div><button class="smallbtn danger" data-delasset="${i}">ลบ</button>`;root.appendChild(d)});root.querySelectorAll('[data-delasset]').forEach(b=>b.onclick=()=>{assets.splice(+b.dataset.delasset,1);renderAssets()})}
+$('assetFiles').onchange=async e=>{const files=[...e.target.files];for(const f of files){if(assets.length>=8)break;if(!f.type.startsWith('image/'))continue;const dataUrl=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(f)});assets.push({name:f.name,type:getVal('assetType'),dataUrl})}renderAssets();e.target.value=''};
+$('clearAssets').onclick=()=>{assets=[];renderAssets()};
+$('callApi').onclick=async()=>{const url=getVal('apiUrl');if(!url){$('apiStatus').textContent='กรุณาระบุ Backend URL ก่อน';return}const c=projectConfig();$('apiStatus').textContent='กำลังเรียก Backend...';try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:getVal('apiInstruction')+'\n\nProject configuration:\n'+JSON.stringify(c)+'\n\nCurrent story:\n'+JSON.stringify(storyData)+'\n\nCurrent scenes:\n'+JSON.stringify(scenes),project:currentProject()})});const data=await r.json();if(!r.ok)throw new Error(data.error||`HTTP ${r.status}`);$('apiStatus').textContent='Backend ตอบกลับแล้ว';$('synopsis').value=data.text||JSON.stringify(data,null,2)}catch(e){$('apiStatus').textContent='เรียก API ไม่สำเร็จ: '+e.message+' — ตรวจสอบว่าเซิร์ฟเวอร์ทำงานและ CORS อนุญาต origin นี้'}}
+$('testApi').onclick=async()=>{const url=getVal('apiUrl');if(!url){$('apiStatus').textContent='กรุณากรอก Backend URL';return}try{const r=await fetch(url.replace(/\/api\/generate\/?$/,'/health'));const d=await r.json();$('apiStatus').textContent=r.ok?'เชื่อมต่อได้: '+JSON.stringify(d):'Health check error '+r.status}catch(e){$('apiStatus').textContent='เชื่อมต่อไม่ได้: '+e.message}}
+$('promptScene').onchange=()=>buildPrompt(+$('promptScene').value);
+makeStory();sceneTemplates();switchTab('overview');
+</script>
+</body>
+</html>
