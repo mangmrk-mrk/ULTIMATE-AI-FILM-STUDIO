@@ -1,0 +1,12 @@
+{
+  "name": "ultimate-ai-film-studio",
+  "version": "1.0.0",
+  "description": "AI Story Lab: cinematic storytelling -> storyboard -> Google Flow prompts",
+  "type": "module",
+  "private": true,
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev:mock": "MOCK=1 node server.mjs"
+  }
+}
