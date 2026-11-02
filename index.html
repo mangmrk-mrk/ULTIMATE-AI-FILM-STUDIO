@@ -47,9 +47,9 @@ footer{max-width:1400px;margin:0 auto;padding:0 22px 28px;color:var(--muted);fon
 <label>ตัวละครหลัก / ลักษณะที่ต้องล็อก</label><textarea id="character">นักเดินทางชายวัยผู้ใหญ่ รูปร่างนักผจญภัย เสื้อคลุมเดินทางสีเข้ม มีรอยแผลเล็กเหนือคิ้วซ้าย พกดาบโบราณ</textarea>
 <label>สถานที่หลัก</label><textarea id="setting">อาณาจักรจีนโบราณเหนือทะเลเมฆ สถาปัตยกรรมหินหยก สะพานลอยฟ้า น้ำตกไหลลงสู่เมฆ</textarea>
 <label>โทนเสียง / Sound design</label><input id="sound" value="orchestral cinematic score, wind ambience, deep dragon growl, stone impacts">
-<div class="actions"><button class="primary" id="generateStory">สร้างโครงเรื่อง + ฉาก</button><button id="saveProject">บันทึก JSON</button><button id="loadProject">นำเข้า JSON</button><input id="importFile" type="file" accept=".json,application/json" hidden></div>
+<div class="actions"><button class="primary" id="generateStory">สร้างโครงเรื่อง + ฉาก (Template)</button><button class="mint" id="generateAI">✦ AI สร้างเรื่อง + ฉาก + ช็อต</button><button id="saveProject">บันทึก JSON</button><button id="loadProject">นำเข้า JSON</button><input id="importFile" type="file" accept=".json,application/json" hidden></div>
 <div class="status" id="status"></div>
-<div class="notice">เวอร์ชันนี้สร้างเรื่องและ Prompt ภายในเบราว์เซอร์ได้ทันที ไม่ต้องใช้ API Key หากต้องการให้ AI เขียนเนื้อหาแบบสด ให้ตั้งค่า Backend ในแท็บ API</div>
+<div class="notice">Template mode ใช้งานได้โดยไม่ต้องมี API ส่วนปุ่ม AI จะใช้ Gemini ผ่าน Backend เพื่อสร้าง Story Bible, Scene Breakdown และ Shot List จริง แล้วนำผลกลับเข้า Storyboard อัตโนมัติ</div>
 </aside>
 <section class="panel">
 <div class="tabs">
@@ -73,7 +73,7 @@ footer{max-width:1400px;margin:0 auto;padding:0 22px 28px;color:var(--muted);fon
 <label>กฎความต่อเนื่อง (Continuity Bible)</label><textarea id="continuity" style="min-height:130px"></textarea>
 </div>
 <div id="scenes" class="view">
-<h2>Scenes & Storyboard</h2><p class="muted">แก้ไขฉากได้ทุกช่อง แล้วกดสร้าง Prompt เพื่ออัปเดตเวอร์ชันที่ใช้ผลิต</p>
+<h2>Scenes & Storyboard</h2><p class="muted">AI จะสร้างช็อตแยกตามเนื้อเรื่อง แต่ละช็อตแก้ไขได้ และสามารถสร้าง Google Flow Prompt ต่อช็อตได้</p>
 <div class="actions"><button class="primary" id="addScene">+ เพิ่มฉาก</button><button id="regenScenes">สร้างฉากใหม่</button><button id="copyAllScenes">คัดลอกทุกฉาก</button></div>
 <div id="sceneList"></div>
 </div>
@@ -93,7 +93,7 @@ footer{max-width:1400px;margin:0 auto;padding:0 22px 28px;color:var(--muted);fon
 </div>
 <div id="api" class="view">
 <h2>API / Developer Settings</h2>
-<div class="notice"><b>ความปลอดภัย:</b> อย่าใส่ Gemini API Key ลงใน HTML ที่นำไปเผยแพร่สาธารณะ ใช้ Backend เป็นตัวกลางเสมอ</div>
+<div class="notice"><b>ความปลอดภัย:</b> อย่าใส่ Gemini API Key ลงใน HTML ที่นำไปเผยแพร่สาธารณะ ใช้ Backend เป็นตัวกลางเสมอ API ใหม่ <code>/api/production</code> จะส่งผลลัพธ์ JSON ที่ตรวจสอบโครงสร้างแล้วกลับเข้า Storyboard</div>
 <label>Backend URL (เช่น http://localhost:3000/api/generate)</label><input id="apiUrl" placeholder="http://localhost:3000/api/generate">
 <label>คำสั่งให้ AI สร้าง / ปรับปรุงเนื้อหา (optional)</label><textarea id="apiInstruction">ช่วยพัฒนาเรื่องและฉากให้เป็นภาพยนตร์ มีเหตุผลต่อเนื่อง ระบุภาพและการกระทำที่มองเห็นได้ หลีกเลี่ยงคำบรรยายคลุมเครือ และส่งผลลัพธ์เป็น JSON ตาม schema ที่กำหนด</textarea>
 <div class="actions"><button class="primary" id="callApi">เรียก Backend เพื่อสร้าง Story</button><button id="testApi">ทดสอบการเชื่อมต่อ</button></div><div class="status" id="apiStatus"></div>
@@ -141,10 +141,10 @@ function sceneTemplates(){
 function renderScenes(){
  const root=$('sceneList');root.innerHTML='';
  scenes.forEach((s,i)=>{const d=document.createElement('div');d.className='scene';d.innerHTML=`
- <div class="scenehead"><b>${escapeHtml(s.title)}</b><span class="tag">${s.duration}s</span></div>
+ <div class="scenehead"><b>${escapeHtml(s.sceneTitle||s.title)}</b><span class="tag">${escapeHtml(s.shotType||"SHOT")} · ${s.duration}s</span></div><div class="muted">Shot ${s.shotNumber||i+1} · ${escapeHtml(s.title)}</div>
  <label>ชื่อฉาก</label><input data-field="title" data-i="${i}" value="${escapeHtml(s.title)}">
  <div class="grid2"><div><label>ระยะเวลา (วินาที)</label><select data-field="duration" data-i="${i}">${[4,6,8,10].map(v=>`<option ${s.duration===v?'selected':''}>${v}</option>`).join('')}</select></div><div><label>กล้อง / การเคลื่อนกล้อง</label><input data-field="camera" data-i="${i}" value="${escapeHtml(s.camera)}"></div></div>
- <label>ภาพและการกระทำ (Visual action)</label><textarea data-field="visual" data-i="${i}">${escapeHtml(s.visual)}</textarea>
+ <label>ภาพและการกระทำ (Visual action)</label><textarea data-field="visual" data-i="${i}">${escapeHtml(s.visual)}</textarea><label>ประเภทช็อต</label><input data-field="shotType" data-i="${i}" value="${escapeHtml(s.shotType||"Cinematic shot")}">
  <label>แสงและสไตล์ภาพ</label><textarea data-field="lighting" data-i="${i}">${escapeHtml(s.lighting)}</textarea>
  <label>เสียง / ดนตรี / SFX</label><textarea data-field="audio" data-i="${i}">${escapeHtml(s.audio)}</textarea>
  <label>บทพากย์ / บทพูด</label><textarea data-field="voice" data-i="${i}">${escapeHtml(s.voice)}</textarea>
@@ -167,7 +167,29 @@ function currentProject(){return {app:'Ultimate AI Film Studio',version:1,create
 function download(name,content,type='text/plain'){const blob=new Blob([content],{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function safeName(s){return (s||'film-project').replace(/[^a-z0-9ก-๙_-]+/gi,'-').slice(0,60)}
 function loadProject(p){if(p.config)Object.entries(p.config).forEach(([k,v])=>{let el=$({name:'projectName',idea:'idea',genre:'genre',length:'length',clipLength:'clipLength',ratio:'ratio',style:'style',voiceLang:'voiceLang',mood:'mood',character:'character',setting:'setting',sound:'sound'}[k]);if(el)el.value=v});storyData=p.story||{};if(p.storyFields)Object.entries(p.storyFields).forEach(([k,v])=>{if($(k))$(k).value=v});scenes=p.scenes||[];assets=p.assets||[];renderScenes();renderAssets();populatePromptSelect();updateStats();setStatus('นำเข้าโปรเจกต์แล้ว')}
+
+async function generateWithAI(){
+ const configured=getVal('apiUrl');
+ const endpoint=configured
+   ? configured.replace(/\\/api\\/generate\\/?$/,'/api/production').replace(/\\/$/,'') + (configured.endsWith('/api/production')?'':'')
+   : (location.protocol==='file:'?'':location.origin+'/api/production');
+ if(!endpoint){$('apiStatus').textContent='กรุณาเปิดเว็บผ่าน Backend หรือกำหนด Backend URL ในแท็บ API';switchTab('api');return}
+ const btn=$('generateAI');btn.disabled=true;btn.textContent='AI กำลังวิเคราะห์เรื่องและสร้างช็อต...';setStatus('กำลังส่งไอเดียไปยัง Gemini...');
+ try{
+  const r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({project:currentProject(),instruction:getVal('apiInstruction')})});
+  const data=await r.json();if(!r.ok)throw new Error(data.error||('HTTP '+r.status));
+  const p=data.production;if(!p||!Array.isArray(p.shots)||!p.story)throw new Error('รูปแบบ JSON จาก AI ไม่ถูกต้อง');
+  storyData={logline:p.story.logline||'',synopsis:p.story.synopsis||'',beat1:p.story.beat1||'',beat2:p.story.beat2||'',beat3:p.story.beat3||'',beat4:p.story.beat4||'',continuity:p.continuity||''};
+  Object.entries(storyData).forEach(([k,v])=>{if($(k))$(k).value=v});
+  scenes=p.shots.map((shot,i)=>({id:String(shot.id||('ai-'+Date.now()+'-'+i)),sceneTitle:shot.sceneTitle||('Scene '+(i+1)),shotNumber:shot.shotNumber||i+1,title:shot.title||('Shot '+(i+1)),duration:Number(shot.duration)||projectConfig().clipLength,shotType:shot.shotType||'Cinematic shot',visual:shot.visual||'',camera:shot.camera||'Medium shot, controlled dolly',lighting:shot.lighting||projectConfig().style,audio:shot.audio||projectConfig().sound,voice:shot.voice||'',transition:shot.transition||'Motivated cut',prompt:''}));
+  renderScenes();populatePromptSelect();updateStats();switchTab('scenes');
+  setStatus('AI สร้าง '+scenes.length+' ช็อตสำเร็จ · '+scenes.reduce((n,x)=>n+x.duration,0)+' วินาที');
+ }catch(e){setStatus('AI generation ไม่สำเร็จ: '+e.message);$('apiStatus').textContent=e.message}
+ finally{btn.disabled=false;btn.textContent='✦ AI สร้างเรื่อง + ฉาก + ช็อต'}
+}
+
 $('generateStory').onclick=()=>{makeStory();sceneTemplates();switchTab('scenes')};
+$('generateAI').onclick=generateWithAI;
 $('refreshStory').onclick=makeStory;
 $('regenScenes').onclick=sceneTemplates;
 $('addScene').onclick=()=>{const c=projectConfig();scenes.push({id:String(Date.now()),title:`Scene ${scenes.length+1} — New beat`,duration:c.clipLength,visual:c.character+' performs a clear, motivated action in '+c.setting,camera:'Medium shot, slow dolly-in',lighting:c.style+', motivated cinematic lighting',audio:c.sound,voice:'',transition:'Cut on action into next scene',prompt:''});renderScenes();populatePromptSelect();updateStats()};
