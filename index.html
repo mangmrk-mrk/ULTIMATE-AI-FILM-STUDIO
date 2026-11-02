@@ -170,9 +170,14 @@ function loadProject(p){if(p.config)Object.entries(p.config).forEach(([k,v])=>{l
 
 async function generateWithAI(){
  const configured=getVal('apiUrl');
- const endpoint=configured
-   ? configured.replace(/\\/api\\/generate\\/?$/,'/api/production').replace(/\\/$/,'') + (configured.endsWith('/api/production')?'':'')
-   : (location.protocol==='file:'?'':location.origin+'/api/production');
+ let endpoint='';
+ if(configured){
+  let base=configured;
+  if(base.endsWith('/api/generate'))base=base.slice(0,-12);
+  else if(base.endsWith('/api/production'))base=base.slice(0,-15);
+  while(base.endsWith('/'))base=base.slice(0,-1);
+  endpoint=base+'/api/production';
+ }else if(location.protocol!=='file:'){endpoint=location.origin+'/api/production'}
  if(!endpoint){$('apiStatus').textContent='กรุณาเปิดเว็บผ่าน Backend หรือกำหนด Backend URL ในแท็บ API';switchTab('api');return}
  const btn=$('generateAI');btn.disabled=true;btn.textContent='AI กำลังวิเคราะห์เรื่องและสร้างช็อต...';setStatus('กำลังส่งไอเดียไปยัง Gemini...');
  try{
