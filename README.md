@@ -52,3 +52,26 @@ AI Story Lab · Cinematic storytelling → storyboard → Google Flow prompts
 - ถ้าจะเปิด server ให้คนอื่นเข้าถึงผ่านอินเทอร์เน็ต ให้ตั้ง `ALLOWED_ORIGIN` เป็นโดเมนของคุณ และวางหลัง reverse proxy ที่มี HTTPS
   เพราะ server นี้ยังไม่มีระบบล็อกอิน ใครเข้าถึงได้ก็ใช้โควต้า key ของคุณได้ (มี rate limit ต่อ IP กันไว้ระดับหนึ่งเท่านั้น)
 - backend นี้เรียก Gemini สำหรับสร้างข้อความ ไม่ได้ควบคุมหน้าเว็บของ Google Flow โดยตรง
+
+
+## AI Story-to-Film Production (V2)
+
+When the app is served by the backend, the **AI สร้างเรื่อง + ฉาก + ช็อต** action calls `POST /api/production`.
+The endpoint asks Gemini for a structured JSON production package containing:
+
+- Story Bible: logline, synopsis, four story beats
+- Continuity Bible: character, wardrobe, props, location, screen direction and visual style locks
+- Shot list: scene grouping, shot type, visible action, camera, lighting, audio, narration and transitions
+- Exact target runtime reconciliation and Google Flow-ready prompt fields
+
+The frontend imports the generated package directly into the editable Scenes / Storyboard view. The existing template generator remains available as an offline fallback.
+
+### V2 API
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/production` | Generate a structured Story Bible + shot list using Gemini; returns `production`, `totalDuration`, `model`, and `mock` |
+| `POST` | `/api/generate` | Legacy free-form text generation endpoint |
+| `GET` | `/health` | Backend status |
+
+For local use, configure `GEMINI_API_KEY` in the server environment or `.env`, run `npm start`, then open `http://127.0.0.1:3000/`. Set `MOCK=1` to exercise the production flow without a Gemini key. The backend creates text and prompts; it does not directly operate Google Flow or render video.
