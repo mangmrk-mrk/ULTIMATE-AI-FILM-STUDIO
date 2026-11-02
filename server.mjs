@@ -101,7 +101,7 @@ function rateLimited(ip) {
 }
 
 // ---------- เรียก Gemini ----------
-async function callGemini(prompt) {
+async function callGemini(prompt, jsonMode = false) {
   if (MOCK) {
     return `[MOCK] ได้รับ prompt ยาว ${prompt.length} ตัวอักษร\n\n` + prompt.slice(0, 400);
   }
@@ -117,7 +117,7 @@ async function callGemini(prompt) {
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': API_KEY },
       body: JSON.stringify({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.8 },
+        generationConfig: jsonMode ? { temperature: 0.65, responseMimeType: 'application/json' } : { temperature: 0.8 },
       }),
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });
@@ -166,6 +166,79 @@ const server = http.createServer(async (req, res) => {
       return res.end(html);
     }
 
+
+    if (req.method === 'POST' && pathname === '/api/production') {
+      const ip = req.socket.remoteAddress || 'unknown';
+      if (rateLimited(ip)) throw new HttpError(429, `เรียกถี่เกินไป (จำกัด ${RATE_LIMIT_PER_MIN} ครั้งต่อนาที)`);
+      const ctype = req.headers['content-type'] || '';
+      if (!ctype.includes('application/json')) throw new HttpError(415, 'ต้องส่ง Content-Type: application/json');
+      let body;
+      try { body = JSON.parse(await readBody(req)); }
+      catch (e) { throw e instanceof HttpError ? e : new HttpError(400, 'JSON ไม่ถูกต้อง'); }
+      const project = body?.project?.config || body?.project || {};
+      const idea = String(project.idea || '').trim();
+      if (!idea) throw new HttpError(400, 'กรุณาระบุไอเดียเรื่องก่อนสร้าง Production Package');
+      const targetSeconds = Math.max(4, Math.min(3600, Number(project.length) || 60));
+      const clipSeconds = Math.max(4, Math.min(10, Number(project.clipLength) || 8));
+      const maxShots = Math.min(120, Math.ceil(targetSeconds / 4));
+      const prompt = `You are an expert film director, screenwriter, storyboard artist and AI video prompt engineer.
+Create a production-ready film package from the project below. Return ONLY valid JSON matching this schema:
+{
+ "story":{"logline":"...","synopsis":"...","beat1":"...","beat2":"...","beat3":"...","beat4":"..."},
+ "continuity":"A concise continuity bible locking character appearance, costume, props, location, screen direction, lighting and color palette.",
+ "shots":[{"id":"shot-01","sceneTitle":"Scene name","shotNumber":1,"title":"Specific shot title","shotType":"establishing|wide|medium|close-up|insert|tracking|action|POV|aerial|other","duration":8,"visual":"One concrete visible action with subject, environment, beginning-to-end movement and emotional beat.","camera":"Shot size, lens feel, angle, movement and composition.","lighting":"Motivated light sources, contrast, color palette and atmosphere.","audio":"Ambience, score and specific SFX.","voice":"Narration/dialogue or No dialogue.","transition":"How this shot connects to the next shot.","flowPrompt":"Complete English Google Flow prompt with continuity locks."}]
+}
+Rules:
+- Story must be specific to the supplied idea, not a generic template. Build a coherent beginning, escalation, climax and resolution.
+- Create sequential scene groups and multiple purposeful shots where duration allows. Every shot must advance story or reveal meaningful information.
+- Total shot durations MUST equal exactly ${targetSeconds} seconds. Use shot durations between 4 and ${clipSeconds} seconds; adjust the final shot to hit the exact target. If the exact total cannot be achieved with these limits, use the nearest valid distribution while preserving the total exactly.
+- Maximum ${maxShots} shots. Do not exceed target duration.
+- Maintain character, wardrobe, prop, location, geography, screen direction and lighting continuity.
+- Every shot must be visually filmable: specify what the camera sees and what changes during the shot. Avoid abstract descriptions.
+- Prompt language: English for flowPrompt; story fields may use Thai when project language is Thai.
+- Respect genre, style, aspect ratio, voice and sound requirements. Do not invent dialogue if no-dialogue is selected.
+- Do not include Markdown fences or commentary. All required fields must be present.
+PROJECT CONFIG:
+${JSON.stringify(project)}
+USER INSTRUCTION:
+${String(body.instruction || 'Create the strongest cinematic adaptation of the idea.').slice(0,4000)}`;
+      if (prompt.length > MAX_PROMPT_CHARS) throw new HttpError(413, 'คำสั่งยาวเกินขีดจำกัด');
+      let production;
+      if (MOCK) {
+        const n = Math.max(1, Math.ceil(targetSeconds / clipSeconds));
+        let remaining = targetSeconds;
+        const shots = Array.from({length:n}, (_,i) => {
+          const duration = Math.min(clipSeconds, remaining - Math.max(0,n-i-1)*4);
+          remaining -= duration;
+          return {id:`mock-${i+1}`,sceneTitle:`Scene ${Math.floor(i/2)+1}`,shotNumber:i+1,title:`Shot ${i+1}`,shotType:i===0?'establishing':'cinematic',duration,visual:`${idea} — shot progression ${i+1}`,camera:'Cinematic wide-to-medium coverage, controlled dolly',lighting:`${project.style || 'Photorealistic cinema'}, motivated lighting`,audio:project.sound || 'Cinematic score and ambience',voice:project.voiceLang?.includes('No dialogue')?'No dialogue.':'Thai narration',transition:'Motivated cut on action',flowPrompt:''};
+        });
+        production = {story:{logline:idea,synopsis:`Mock production package for ${project.name || 'Untitled'}: ${idea}`,beat1:'Establish the world and protagonist.',beat2:'Reveal the central obstacle.',beat3:'Confront the decisive challenge.',beat4:'Resolve the conflict with a memorable final image.'},continuity:`CHARACTER LOCK: ${project.character || 'Maintain consistent protagonist'}\\nWORLD LOCK: ${project.setting || 'Maintain consistent setting'}\\nSTYLE LOCK: ${project.style || 'Cinematic realism'}`,shots};
+      } else {
+        const raw = await callGemini(prompt, true);
+        try { production = JSON.parse(raw); }
+        catch { throw new HttpError(502, 'Gemini ส่ง JSON ไม่ถูกต้อง กรุณาลองสร้างใหม่'); }
+      }
+      if (!production || !production.story || !Array.isArray(production.shots) || production.shots.length === 0) {
+        throw new HttpError(502, 'AI ส่ง Production Package ไม่ครบ schema');
+      }
+      production.shots = production.shots.slice(0, maxShots).map((shot, i) => ({
+        id: String(shot.id || `shot-${i+1}`), sceneTitle: String(shot.sceneTitle || `Scene ${i+1}`),
+        shotNumber: Number(shot.shotNumber) || i+1, title: String(shot.title || `Shot ${i+1}`),
+        shotType: String(shot.shotType || 'cinematic'), duration: Math.max(1, Number(shot.duration) || clipSeconds),
+        visual: String(shot.visual || ''), camera: String(shot.camera || ''), lighting: String(shot.lighting || ''),
+        audio: String(shot.audio || ''), voice: String(shot.voice || ''), transition: String(shot.transition || ''),
+        flowPrompt: String(shot.flowPrompt || '')
+      }));
+      const sum = production.shots.reduce((n, shot) => n + shot.duration, 0);
+      if (sum !== targetSeconds) {
+        let delta = targetSeconds - sum;
+        const last = production.shots[production.shots.length - 1];
+        if (last.duration + delta >= 1) last.duration += delta;
+        else throw new HttpError(502, `AI สร้างความยาวรวม ${sum}s ไม่ตรงเป้าหมาย ${targetSeconds}s กรุณาลองใหม่`);
+      }
+      return sendJson(req, res, 200, { production, totalDuration: production.shots.reduce((n, shot) => n + shot.duration, 0), model: MODEL, mock: MOCK });
+    }
+
     if (req.method === 'POST' && pathname === '/api/generate') {
       const ip = req.socket.remoteAddress || 'unknown';
       if (rateLimited(ip)) {
@@ -185,7 +258,7 @@ const server = http.createServer(async (req, res) => {
         throw new HttpError(413, `prompt ยาวเกินไป (${prompt.length} ตัวอักษร จำกัด ${MAX_PROMPT_CHARS})`);
       }
 
-      const text = await callGemini(prompt);
+      const text = await callGemini(prompt, false);
       return sendJson(req, res, 200, { text });
     }
 
